@@ -41,10 +41,15 @@ export class Assignment4 extends Scene {
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.obstacle_time = 0;
+        this.top_obstacle_time = -6;
+        this.obstacle_top_noise = 0;
+        this.obstacle_bottom_noise = 0;
     }
 
     make_control_panel() {
         // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
+
     }
 
     display(context, program_state) {
@@ -53,7 +58,7 @@ export class Assignment4 extends Scene {
             // Define the global camera and projection matrices, which are stored in program_state.
             program_state.set_camera(Mat4.translation(0, 0, -8));
         }
-
+        let alive = 1;
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
 
@@ -65,7 +70,41 @@ export class Assignment4 extends Scene {
 
         // TODO:  Draw the required boxes. Also update their stored matrices.
         // You can remove the folloeing line.
-        this.shapes.axis.draw(context, program_state, model_transform, this.materials.phong.override({color: hex_color("#ffff00")}));
+        if(alive){
+            //player
+            this.shapes.box_1.draw(context, program_state, model_transform, this.materials.phong.override({color: hex_color("#ffff00")}));
+
+            //obstacle (bottom one)
+            if(this.obstacle_bottom_noise == 0)
+            {
+                this.obstacle_bottom_noise = Math.random()*3;
+            }
+            let obstacle_location = 30-8*(t- this.obstacle_time );
+            if (obstacle_location < -30)
+            {
+                this.obstacle_bottom_noise = 0;
+                this.obstacle_time = t;
+                obstacle_location = 30
+            }
+            let model_transform_obstacle = model_transform.times(Mat4.translation(obstacle_location+this.obstacle_bottom_noise, 0, 0));
+
+            this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.phong.override({color: hex_color("#aabb33")}));
+            //top one
+            if(this.obstacle_top_noise == 0)
+            {
+                this.obstacle_top_noise = Math.random()*3;
+            }
+            let top_obstacle_location = 30-8*(t- this.top_obstacle_time );
+            if (top_obstacle_location < -30)
+            {
+                this.obstacle_top_noise = 0;
+                this.top_obstacle_time = t;
+                top_obstacle_location = 30;
+            }
+            let model_transform_top_obstacle = model_transform.times(Mat4.translation(top_obstacle_location+this.obstacle_top_noise, 4, 0));
+
+            this.shapes.box_2.draw(context, program_state, model_transform_top_obstacle, this.materials.phong.override({color: hex_color("#aabb33")}));
+        }
     }
 }
 
