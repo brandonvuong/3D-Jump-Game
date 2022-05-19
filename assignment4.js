@@ -39,16 +39,21 @@ export class Assignment4 extends Scene {
                 texture: new Texture("assets/stars.png")
             }),
         }
-
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         this.obstacle_time = 0;
         this.top_obstacle_time = -6;
         this.obstacle_top_noise = 0;
         this.obstacle_bottom_noise = 0;
+        this.player_y = 0.0;
+        this.velocity = 0.0;
+        this.jump = false;
+        this.jump_time = 0;
     }
 
     make_control_panel() {
         // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
+        this.key_triggered_button("Jump", ["ArrowUp"], ()=>this.jump = true, hex_color('#ff0000'), ()=>this.jump=false);
+
 
     }
 
@@ -72,8 +77,19 @@ export class Assignment4 extends Scene {
         // You can remove the folloeing line.
         if(alive){
             //player
-            this.shapes.box_1.draw(context, program_state, model_transform, this.materials.phong.override({color: hex_color("#ffff00")}));
+            if (this.jump && this.player_y == 0){
+                this.velocity = 35;
+            }
+            const acceleration = -70*(t-this.jump_time);
+            this.player_y += (t-this.jump_time) * (this.velocity + acceleration * (1/2));
+            this.player_y = Math.max(this.player_y, 0.0);
+            this.velocity +=acceleration;
+            let model_transform_player = model_transform.times(Mat4.translation(0,this.player_y,0));
 
+            this.jump_time = t;
+
+
+            this.shapes.box_1.draw(context, program_state, model_transform_player, this.materials.phong.override({color: hex_color("#ff0000")}));
             //obstacle (bottom one)
             if(this.obstacle_bottom_noise == 0)
             {
