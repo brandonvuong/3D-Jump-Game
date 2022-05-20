@@ -56,12 +56,13 @@ export class Assignment4 extends Scene {
         this.velocity = 0.0;
         this.jump = false;
         this.jump_time = 0;
+        this.duck = false;
     }
 
     make_control_panel() {
         // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
         this.key_triggered_button("Jump", ["ArrowUp"], ()=>this.jump = true, hex_color('#ff0000'), ()=>this.jump=false);
-
+        this.key_triggered_button("Duck", ["ArrowDown"], ()=>this.duck=true, hex_color('#ff0000'), ()=>this.duck=false);
 
     }
 
@@ -85,6 +86,7 @@ export class Assignment4 extends Scene {
         // You can remove the folloeing line.
         if(alive){
             //player
+            let model_transform_player = model_transform;
             if (this.jump && this.player_y == 0){
                 this.velocity = 35;
             }
@@ -92,9 +94,16 @@ export class Assignment4 extends Scene {
             this.player_y += (t-this.jump_time) * (this.velocity + acceleration * (1/2));
             this.player_y = Math.max(this.player_y, 0.0);
             this.velocity +=acceleration;
-            let model_transform_player = model_transform.times(Mat4.translation(0,this.player_y,0));
+            model_transform_player = model_transform_player.times(Mat4.translation(0,this.player_y,0));
 
             this.jump_time = t;
+
+            if (this.duck) {
+                this.velocity = -35;
+                if (this.player_y ==0){
+                    model_transform_player = model_transform_player.times(Mat4.scale(1,1/2,1)).times(Mat4.translation(0,-1,0));
+                }
+            }
 
 
             this.shapes.box_1.draw(context, program_state, model_transform_player, this.materials.phong.override({color: hex_color("#ff0000")}));
