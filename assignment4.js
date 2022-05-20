@@ -39,11 +39,19 @@ export class Assignment4 extends Scene {
                 texture: new Texture("assets/stars.png")
             }),
         }
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
-        this.obstacle_time = 0;
-        this.top_obstacle_time = -6;
-        this.obstacle_top_noise = 0;
-        this.obstacle_bottom_noise = 0;
+        this.initial_camera_location = Mat4.look_at(vec3(7, 4, 18), vec3(7, 5, 0), vec3(0, 1, 0));
+        this.obstacle_locations = [
+            {obx: 20, xnoise: Math.random()*2-1,
+            oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 35, xnoise: Math.random()*2-1,
+            oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 50, xnoise: Math.random()*2-1,
+            oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 65, xnoise: Math.random()*2-1,
+            oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 80, xnoise: Math.random()*2-1,
+            oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+        ]
         this.player_y = 0.0;
         this.velocity = 0.0;
         this.jump = false;
@@ -61,7 +69,7 @@ export class Assignment4 extends Scene {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
-            program_state.set_camera(Mat4.translation(0, 0, -8));
+            program_state.set_camera(this.initial_camera_location);
         }
         let alive = 1;
         program_state.projection_transform = Mat4.perspective(
@@ -90,36 +98,27 @@ export class Assignment4 extends Scene {
 
 
             this.shapes.box_1.draw(context, program_state, model_transform_player, this.materials.phong.override({color: hex_color("#ff0000")}));
-            //obstacle (bottom one)
-            if(this.obstacle_bottom_noise == 0)
+            //obstacles
+            for(let i = 0; i < this.obstacle_locations.length; i++)
             {
-                this.obstacle_bottom_noise = Math.random()*3;
-            }
-            let obstacle_location = 30-8*(t- this.obstacle_time );
-            if (obstacle_location < -30)
-            {
-                this.obstacle_bottom_noise = 0;
-                this.obstacle_time = t;
-                obstacle_location = 30
-            }
-            let model_transform_obstacle = model_transform.times(Mat4.translation(obstacle_location+this.obstacle_bottom_noise, 0, 0));
+                let x_loc = this.obstacle_locations[i].obx-12*(t-this.obstacle_locations[i].spawn_time);
+                if (x_loc < -11)
+                {
+                    this.obstacle_locations[i].obx = 69;
+                    this.obstacle_locations[i].oby = Math.random()*5;
+                    this.obstacle_locations[i].spawn_time = t;
+                    this.obstacle_locations[i].xnoise = Math.random()*2-1;
+                    this.obstacle_locations[i].color = color(Math.random(), Math.random(), Math.random(), 1)
+                    x_loc = this.obstacle_locations[i].obx;
+                }
+                x_loc+= this.obstacle_locations[i].xnoise;
+                let model_transform_obstacle = model_transform.times(Mat4.translation(x_loc, this.obstacle_locations[i].oby, 0));
 
-            this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.phong.override({color: hex_color("#aabb33")}));
-            //top one
-            if(this.obstacle_top_noise == 0)
-            {
-                this.obstacle_top_noise = Math.random()*3;
+                this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.phong.override({color:this.obstacle_locations[i].color}));
             }
-            let top_obstacle_location = 30-8*(t- this.top_obstacle_time );
-            if (top_obstacle_location < -30)
-            {
-                this.obstacle_top_noise = 0;
-                this.top_obstacle_time = t;
-                top_obstacle_location = 30;
-            }
-            let model_transform_top_obstacle = model_transform.times(Mat4.translation(top_obstacle_location+this.obstacle_top_noise, 4, 0));
 
-            this.shapes.box_2.draw(context, program_state, model_transform_top_obstacle, this.materials.phong.override({color: hex_color("#aabb33")}));
+
+
         }
     }
 }
@@ -164,4 +163,3 @@ class Texture_Rotate extends Textured_Phong {
         } `;
     }
 }
-
