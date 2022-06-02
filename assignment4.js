@@ -1,4 +1,5 @@
 import {defs, tiny} from './examples/common.js';
+import {Shape_From_File} from "./examples/obj-file-demo.js";
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
@@ -51,6 +52,7 @@ export class Text_Line extends Shape {                           // **Text_Line*
             this.copy_onto_graphics_card(context, ["texture_coord"], false);
     }
 }
+
 function collision(l1, r1, l2, r2)
 {
     return ((l1 < l2 && l2 < r1 )||(l1<r2 && r2 < r1))
@@ -73,9 +75,16 @@ export class Assignment4 extends Scene {
             box_2: new Cube(),
             text_1: new Text_Line(35),
             axis: new Axis_Arrows(),
+            player_run1: new Shape_From_File("./assets/player_run1.obj"),
+            player_run2: new Shape_From_File("./assets/player_run2.obj"),
+            player_duck1: new Shape_From_File("./assets/player_duck1.obj"),
+            player_duck2: new Shape_From_File("./assets/player_duck2.obj"),
+            player_duck: new Shape_From_File("./assets/player_duck.obj"),
         }
         console.log(this.shapes.box_1.arrays.texture_coord)
-
+        // this.shapes.player_run1.arrays.texture_coord.forEach(v => v.scale_by(2));
+        // this.shapes.player_run2.arrays.texture_coord.forEach(v => v.scale_by(2));
+        // this.shapes.player_duck.arrays.texture_coord.forEach(v => v.scale_by(2));
 
         // TODO:  Create the materials required to texture both cubes with the correct images and settings.
         //        Make each Material from the correct shader.  Phong_Shader will work initially, but when
@@ -92,6 +101,16 @@ export class Assignment4 extends Scene {
             text_image: new Material(new Textured_Phong(), {
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
+            }),
+            player_mat: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/player_texture.png")
+            }),
+            obstacle_mat: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/powell_cat.jpg")
             }),
         }
 
@@ -138,8 +157,8 @@ export class Assignment4 extends Scene {
     }
     make_control_panel() {
         // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
-        this.key_triggered_button("Jump", ["ArrowUp"], ()=>this.jump = true, hex_color('#ff0000'), ()=>this.jump=false);
-        this.key_triggered_button("Duck", ["ArrowDown"], ()=>this.duck=true, hex_color('#ff0000'), ()=>this.duck=false);
+        this.key_triggered_button("Jump", ["ArrowUp"], ()=>this.jump = true, '#ff0000', ()=>this.jump=false);
+        this.key_triggered_button("Duck", ["ArrowDown"], ()=>this.duck=true, '#ff0000', ()=>this.duck=false);
         //this.key_triggered_button("Restart", ["q"], ()=>this.reset_flag=1);
 
     }
@@ -179,13 +198,37 @@ export class Assignment4 extends Scene {
 
             this.jump_time = t;
 
+            let tmp1 = this.shapes.player_run1;
+            let tmp2 = this.shapes.player_run2;
+
             if (this.duck) {
                 this.velocity = -35;
-                if (this.player_y ==0){
-                    model_transform_player = model_transform_player.times(Mat4.scale(1,1/2,1)).times(Mat4.translation(0,-1,0));
+                if (this.player_y ===0){
+                    //model_transform_player = model_transform_player.times(Mat4.scale(1,1/2,1)).times(Mat4.translation(0,-1,0));
+                    if (Math.round(4*t) % 2 !== 0) {
+                        this.shapes.player_run1 = this.shapes.player_run2 = this.shapes.player_duck1;
+                    }
+                    else
+                        this.shapes.player_run1 = this.shapes.player_run2 = this.shapes.player_duck2;
+                    //model_transform_player = model_transform_player.times(Mat4.rotation(1, 0,1,0));
                 }
             }
-            this.shapes.box_1.draw(context, program_state, model_transform_player, this.materials.phong);
+            model_transform_player = model_transform_player.times(Mat4.rotation(-1.5, 0,1,0));
+            if (Math.round(4*t) % 2 !== 0 && this.player_y === 0) {
+                this.shapes.player_run1.draw(context, program_state, model_transform_player, this.materials.player_mat);
+                this.shapes.player_run1 = tmp1;
+                this.shapes.player_run2 = tmp2;
+            }
+            else{
+                this.shapes.player_run2.draw(context, program_state, model_transform_player, this.materials.player_mat);
+                this.shapes.player_run1 = tmp1;
+                this.shapes.player_run2 = tmp2;
+            }
+            // else if (this.duck && this.player_y ===0)
+            //     this.shapes.player_duck.draw(context, program_state, model_transform_player, this.materials.phong);
+            // else
+            //     this.shapes.player_run2.draw(context, program_state, model_transform_player, this.materials.phong);
+
 
             let plocs = edges(model_transform_player[0][3], model_transform_player[1][3])
             //score
@@ -217,7 +260,7 @@ export class Assignment4 extends Scene {
                     //document.getElementById('game-over-layout').classList.toggle('activate');
                     break;
                 }
-                this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.phong.override({color: this.obstacle_locations[i].color}));
+                this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.obstacle_mat.override({color: this.obstacle_locations[i].color}));
             }
         }
         else
