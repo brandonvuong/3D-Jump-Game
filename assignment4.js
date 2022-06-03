@@ -88,7 +88,7 @@ export class Assignment4 extends Scene {
         // this.shapes.player_run1.arrays.texture_coord.forEach(v => v.scale_by(2));
         // this.shapes.player_run2.arrays.texture_coord.forEach(v => v.scale_by(2));
         // this.shapes.player_duck.arrays.texture_coord.forEach(v => v.scale_by(2));
-        this.shapes.ground.arrays.texture_coord.forEach(v=>v.scale_by(20));
+       this.shapes.ground.arrays.texture_coord.forEach(v=>v.scale_by(15));
 
         // TODO:  Create the materials required to texture both cubes with the correct images and settings.
         //        Make each Material from the correct shader.  Phong_Shader will work initially, but when
@@ -209,9 +209,9 @@ export class Assignment4 extends Scene {
     }
     make_control_panel() {
         // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
-        this.key_triggered_button("Jump", ["ArrowUp"], ()=>this.jump = true, '#ff0000', ()=>this.jump=false);
-        this.key_triggered_button("Duck", ["ArrowDown"], ()=>this.duck=true, '#ff0000', ()=>this.duck=false);
-        this.key_triggered_button("Restart", ["q"], ()=>this.reset_flag=1);
+        this.key_triggered_button("Jump", ["ArrowUp"], ()=>this.jump = true, '#2774AE', ()=>this.jump=false);
+        this.key_triggered_button("Duck", ["ArrowDown"], ()=>this.duck=true, '#FFD100', ()=>this.duck=false);
+        this.key_triggered_button("Restart", ["q"], ()=>this.reset_flag=1, "#2774AE");
 
     }
 
@@ -256,20 +256,20 @@ export class Assignment4 extends Scene {
             // this.shapes.sky.draw(context,program_state, model_transform_sky, this.materials.sky_mat);
 
             let model_transform_sky_back = model_transform;
-            model_transform_sky_back = model_transform_sky_back.times(Mat4.scale(50,50,50)).times(Mat4.rotation(1.57, 0,1,0)).times(Mat4.translation(0,0,-1));
-            this.shapes.skybox.draw(context,program_state, model_transform_sky_back, this.materials.skybox_back);
+            model_transform_sky_back = model_transform_sky_back.times(Mat4.scale(50,50,50)).times(Mat4.rotation(1.57, 0,1,0)).times(Mat4.translation(0,1,-1));
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_back.times(Mat4.rotation(-0.7,1,0)), this.materials.skybox_back);
             let model_transform_sky_front = model_transform;
             model_transform_sky_front = model_transform_sky_front.times(Mat4.scale(50,50,50)).times(Mat4.rotation(1.57, 0,1,0)).times(Mat4.translation(0,0,1));
-            this.shapes.skybox.draw(context,program_state, model_transform_sky_front, this.materials.skybox_front);
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_front.times(Mat4.rotation(0.7,0,1,0)), this.materials.skybox_front);
             let model_transform_sky_left = model_transform;
             model_transform_sky_left = model_transform_sky_left.times(Mat4.scale(50,50,50)).times(Mat4.translation(0,0,1));
-            this.shapes.skybox.draw(context,program_state, model_transform_sky_left, this.materials.skybox_left);
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_left.times(Mat4.rotation(0.7,0,1,0)), this.materials.skybox_left);
             let model_transform_sky_right = model_transform;
             model_transform_sky_right = model_transform_sky_right.times(Mat4.scale(50,50,50)).times(Mat4.translation(0,0,-1)).times(Mat4.rotation(3.14,0,1,0));
-            this.shapes.skybox.draw(context,program_state, model_transform_sky_right, this.materials.skybox_right);
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_right.times(Mat4.rotation(-0.7,0,1,0)), this.materials.skybox_right);
             let model_transform_sky_top = model_transform;
             model_transform_sky_top = model_transform_sky_top.times(Mat4.scale(50,50,50)).times(Mat4.translation(0,1,0)).times(Mat4.rotation(1.57,1,0,0));
-            this.shapes.skybox.draw(context,program_state, model_transform_sky_top, this.materials.skybox_top);
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_top.times(Mat4.rotation(-0.7,0,1,0)), this.materials.skybox_top);
             //player
             let model_transform_player = model_transform;
             if (this.jump && this.player_y == 0){
