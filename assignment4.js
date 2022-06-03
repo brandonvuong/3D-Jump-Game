@@ -5,7 +5,7 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture,
 } = tiny;
 
-const {Cube, Axis_Arrows, Textured_Phong} = defs
+const {Cube, Axis_Arrows, Textured_Phong, Square, Subdivision_Sphere} = defs
 
 function edges(x, y) {
     return [x-1, x+1, y-1, y+1];
@@ -80,11 +80,15 @@ export class Assignment4 extends Scene {
             player_duck1: new Shape_From_File("./assets/player_duck1.obj"),
             player_duck2: new Shape_From_File("./assets/player_duck2.obj"),
             player_duck: new Shape_From_File("./assets/player_duck.obj"),
+            ground: new Square(),
+            sky: new Subdivision_Sphere(8),
+            skybox: new Square(),
         }
         console.log(this.shapes.box_1.arrays.texture_coord)
         // this.shapes.player_run1.arrays.texture_coord.forEach(v => v.scale_by(2));
         // this.shapes.player_run2.arrays.texture_coord.forEach(v => v.scale_by(2));
         // this.shapes.player_duck.arrays.texture_coord.forEach(v => v.scale_by(2));
+        this.shapes.ground.arrays.texture_coord.forEach(v=>v.scale_by(20));
 
         // TODO:  Create the materials required to texture both cubes with the correct images and settings.
         //        Make each Material from the correct shader.  Phong_Shader will work initially, but when
@@ -111,6 +115,51 @@ export class Assignment4 extends Scene {
                 color: hex_color("#000000"),
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/powell_cat.jpg")
+            }),
+            ground_mat: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/bricks_texture.png")
+            }),
+            grass_mat: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/grass_texture.png")
+            }),
+            sky_mat: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/sky_texture_1.jpg")
+            }),
+            skybox_back: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/skybox/Box_Back.png")
+            }),
+            skybox_bottom: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/skybox/Box_Bottom.png")
+            }),
+            skybox_front: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/skybox/Box_Front.png")
+            }),
+            skybox_left: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/skybox/Box_left.png")
+            }),
+            skybox_right: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/skybox/Box_Right.png")
+            }),
+            skybox_top: new Material(new Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/skybox/Box_Top.png")
             }),
         }
 
@@ -185,6 +234,39 @@ export class Assignment4 extends Scene {
         if (!this.gameover) {
             // TODO:  Draw the required boxes. Also update their stored matrices.
             // You can remove the folloeing line.
+
+            //ground
+            let model_transform_ground = model_transform;
+            model_transform_ground = model_transform_ground.times(Mat4.rotation(1.57, 1, 0, 0)).times(Mat4.translation(0,0,1.7)).times(Mat4.scale(100,5,1));
+            this.shapes.ground.draw(context, program_state, model_transform_ground, this.materials.ground_mat);
+            let model_transform_grass_left = model_transform;
+            model_transform_grass_left = model_transform_grass_left.times(Mat4.rotation(1.57, 1, 0, 0)).times(Mat4.translation(0,-55,1.7)).times(Mat4.scale(100,50,1));
+            this.shapes.ground.draw(context, program_state, model_transform_grass_left, this.materials.grass_mat);
+            let model_transform_grass_right = model_transform;
+            model_transform_grass_right = model_transform_grass_right.times(Mat4.rotation(1.57, 1, 0, 0)).times(Mat4.translation(0,55,1.7)).times(Mat4.scale(100,50,1));
+            this.shapes.ground.draw(context, program_state, model_transform_grass_right, this.materials.grass_mat);
+
+            // sky
+            // First attempt using subdivision sphere, didn't like how it made game look like a circle
+            // let model_transform_sky = model_transform;
+            // model_transform_sky = model_transform_sky.times(Mat4.scale( 50,50,50));
+            // this.shapes.sky.draw(context,program_state, model_transform_sky, this.materials.sky_mat);
+
+            let model_transform_sky_back = model_transform;
+            model_transform_sky_back = model_transform_sky_back.times(Mat4.scale(50,50,50)).times(Mat4.rotation(1.57, 0,1,0)).times(Mat4.translation(0,0,-1));
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_back, this.materials.skybox_back);
+            let model_transform_sky_front = model_transform;
+            model_transform_sky_front = model_transform_sky_front.times(Mat4.scale(50,50,50)).times(Mat4.rotation(1.57, 0,1,0)).times(Mat4.translation(0,0,1));
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_front, this.materials.skybox_front);
+            let model_transform_sky_left = model_transform;
+            model_transform_sky_left = model_transform_sky_left.times(Mat4.scale(50,50,50)).times(Mat4.translation(0,0,1));
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_left, this.materials.skybox_left);
+            let model_transform_sky_right = model_transform;
+            model_transform_sky_right = model_transform_sky_right.times(Mat4.scale(50,50,50)).times(Mat4.translation(0,0,-1)).times(Mat4.rotation(3.14,0,1,0));
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_right, this.materials.skybox_right);
+            let model_transform_sky_top = model_transform;
+            model_transform_sky_top = model_transform_sky_top.times(Mat4.scale(50,50,50)).times(Mat4.translation(0,1,0)).times(Mat4.rotation(1.57,1,0,0));
+            this.shapes.skybox.draw(context,program_state, model_transform_sky_top, this.materials.skybox_top);
             //player
             let model_transform_player = model_transform;
             if (this.jump && this.player_y == 0){
@@ -260,7 +342,11 @@ export class Assignment4 extends Scene {
                     //document.getElementById('game-over-layout').classList.toggle('activate');
                     break;
                 }
-                this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.obstacle_mat.override({color: this.obstacle_locations[i].color}));
+                // rainbow cats
+                //this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.obstacle_mat.override({color: this.obstacle_locations[i].color}));
+                // regular cats
+                this.shapes.box_2.draw(context, program_state, model_transform_obstacle, this.materials.obstacle_mat.override({color: hex_color("000000")}));
+
             }
         }
         else
