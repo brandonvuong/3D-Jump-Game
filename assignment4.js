@@ -103,6 +103,7 @@ export class Assignment4 extends Scene {
                 texture: new Texture("assets/stars.png")
             }),
             text_image: new Material(new Textured_Phong(), {
+                color: hex_color("#232323"),
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
             }),
@@ -163,18 +164,41 @@ export class Assignment4 extends Scene {
             }),
         }
 
-        this.initial_camera_location = Mat4.look_at(vec3(7, 4, 18), vec3(7, 5, 0), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.look_at(vec3(-4, 5, 14), vec3(5, 3, 0), vec3(0, 1, 0));
         this.obstacle_locations = [
             {obx: 20, xnoise: Math.random()*2-1,
-            oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+                oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
             {obx: 35, xnoise: Math.random()*2-1,
-            oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+                oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
             {obx: 50, xnoise: Math.random()*2-1,
-            oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
             {obx: 65, xnoise: Math.random()*2-1,
-            oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
             {obx: 80, xnoise: Math.random()*2-1,
-            oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+        ]
+        this.player_y = 0.0;
+        this.velocity = 0.0;
+        this.jump = false;
+        this.jump_time = 0;
+        this.gameover = 0;
+        this.final_score = 0;
+        this.reset_flag = 0;
+    }
+    restart(context, program_state){
+        program_state.animation_time=0;
+        this.initial_camera_location = Mat4.look_at(vec3(-4, 5, 14), vec3(5, 3, 0), vec3(0, 1, 0));
+        this.obstacle_locations = [
+            {obx: 20, xnoise: Math.random()*2-1,
+                oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 35, xnoise: Math.random()*2-1,
+                oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 50, xnoise: Math.random()*2-1,
+                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 65, xnoise: Math.random()*2-1,
+                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
+            {obx: 80, xnoise: Math.random()*2-1,
+                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
         ]
         this.player_y = 0.0;
         this.velocity = 0.0;
@@ -183,40 +207,19 @@ export class Assignment4 extends Scene {
         this.gameover = 0;
         this.reset_flag = 0;
     }
-    restart(context, program_state){
-        program_state.animation_time=0;
-        this.initial_camera_location = Mat4.look_at(vec3(7, 4, 18), vec3(7, 5, 0), vec3(0, 1, 0));
-        this.obstacle_locations = [
-            {obx: 20, xnoise: Math.random()*2-1,
-                oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
-            {obx: 35, xnoise: Math.random()*2-1,
-                oby: Math.random()*5, spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
-            {obx: 50, xnoise: Math.random()*2-1,
-                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
-            {obx: 65, xnoise: Math.random()*2-1,
-                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
-            {obx: 80, xnoise: Math.random()*2-1,
-                oby: Math.random()*5,spawn_time: 0, color:color(Math.random(), Math.random(), Math.random(), 1)},
-        ]
-        this.player_y = 0.0;
-        this.velocity = 0.0;
-        this.jump = false;
-        this.jump_time = 0;
-        this.gameover = 0;
-    }
     make_control_panel() {
         // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
         this.key_triggered_button("Jump", ["ArrowUp"], ()=>this.jump = true, '#ff0000', ()=>this.jump=false);
         this.key_triggered_button("Duck", ["ArrowDown"], ()=>this.duck=true, '#ff0000', ()=>this.duck=false);
-        //this.key_triggered_button("Restart", ["q"], ()=>this.reset_flag=1);
+        this.key_triggered_button("Restart", ["q"], ()=>this.reset_flag=1);
 
     }
 
     display(context, program_state) {
         if (!context.scratchpad.controls) {
-            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
+            //this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
-            program_state.set_camera(this.initial_camera_location);
+
         }
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
@@ -227,14 +230,14 @@ export class Assignment4 extends Scene {
         let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
         let model_transform = Mat4.identity();
         let level =Math.min(Math.floor(t/15+1), 5);
-        // if(this.reset_flag)
-        // {
-        //     this.restart(context, program_state);
-        // }
-        if (!this.gameover) {
+        if(this.reset_flag)
+        {
+             this.restart(context, program_state);
+        }
+        else if (!this.gameover) {
             // TODO:  Draw the required boxes. Also update their stored matrices.
             // You can remove the folloeing line.
-
+            program_state.set_camera(this.initial_camera_location);
             //ground
             let model_transform_ground = model_transform;
             model_transform_ground = model_transform_ground.times(Mat4.rotation(1.57, 1, 0, 0)).times(Mat4.translation(0,0,1.7)).times(Mat4.scale(100,5,1));
@@ -317,9 +320,11 @@ export class Assignment4 extends Scene {
             let score = t*3
             score = "Score:" + Math.floor(score).toString();
             this.shapes.text_1.set_string(score, context.context);
-            this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(5, 11.5, 0)).times(Mat4.scale(0.3, 0.3, 0.3)), this.materials.text_image);
+            //this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(5, 11.5, 0)).times(Mat4.scale(0.3, 0.3, 0.3)), this.materials.text_image);
+            this.shapes.text_1.draw(context, program_state, Mat4.inverse(this.initial_camera_location).times(Mat4.translation(-2, 5.5, -15)).times(Mat4.scale(0.3, 0.3, 0.3)), this.materials.text_image);
             this.shapes.text_1.set_string("Level: "+level, context.context);
-            this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(16, 11.5, 0)).times(Mat4.scale(0.3, 0.3, 0.3)), this.materials.text_image);
+            //this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(16, 11.5, 0)).times(Mat4.scale(0.3, 0.3, 0.3)), this.materials.text_image);
+            this.shapes.text_1.draw(context, program_state, Mat4.inverse(this.initial_camera_location).times(Mat4.translation(6, 5.5, -15)).times(Mat4.scale(0.3, 0.3, 0.3)), this.materials.text_image);
             //obstacles
 
             for (let i = 0; i < this.obstacle_locations.length; i++) {
@@ -339,6 +344,7 @@ export class Assignment4 extends Scene {
 
                 if (collision(plocs[0], plocs[1], olocs[0], olocs[1]) && collision(plocs[2], plocs[3], olocs[2], olocs[3])) {
                     this.gameover = 1;
+                    this.final_score = score;
                     //document.getElementById('game-over-layout').classList.toggle('activate');
                     break;
                 }
@@ -351,12 +357,16 @@ export class Assignment4 extends Scene {
         }
         else
         {
+            program_state.set_camera(Mat4.look_at(vec3(7, 4, 18), vec3(7, 5, 0), vec3(0, 1, 0)));
             let print_string = "GAME OVER"
             this.shapes.text_1.set_string(print_string, context.context);
             this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(0, 6, 0))
                 .times(Mat4.scale(1.1, 1.1, 1.1)), this.materials.text_image);
-            this.shapes.text_1.set_string("Refresh to restart", context.context);
-            this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(2, 3, 0))
+            this.shapes.text_1.set_string("Press Q to restart", context.context);
+            this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(2, 4, 0))
+                .times(Mat4.scale(0.4, 0.4, 0.4)), this.materials.text_image)
+            this.shapes.text_1.set_string(this.final_score, context.context);
+            this.shapes.text_1.draw(context, program_state, model_transform.times(Mat4.translation(5, 2, 0))
                 .times(Mat4.scale(0.4, 0.4, 0.4)), this.materials.text_image);
 
 
