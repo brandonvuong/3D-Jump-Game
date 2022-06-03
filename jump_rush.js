@@ -58,7 +58,7 @@ function collision(l1, r1, l2, r2)
     return ((l1 < l2 && l2 < r1 )||(l1<r2 && r2 < r1))
 }
 
-export class Assignment4 extends Scene {
+export class Jump_Rush extends Scene {
     /**
      *  **Base_scene** is a Scene that can be added to any display canvas.
      *  Setup the shapes, materials, camera, and lighting here.
